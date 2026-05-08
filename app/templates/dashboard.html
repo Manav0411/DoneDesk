@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Smart Task Manager{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero card-surface mb-4">
+  <div class="hero-copy">
+    <p class="eyebrow mb-2">Task operations</p>
+    <h1 class="display-title mb-2">Your live task dashboard.</h1>
+    <p class="text-soft mb-0">Create, update, and monitor tasks with live notifications and analytics that refresh instantly.</p>
+  </div>
+  <div class="hero-meta">
+    <div class="meta-chip">User: {{ current_user.username }}</div>
+    <div class="meta-chip">Email: {{ current_user.email }}</div>
+  </div>
+</div>
+
+<div id="dashboard-alert" class="alert d-none" role="alert"></div>
+
+<section class="analytics-grid mb-4">
+  <article class="stat-card card-surface">
+    <span class="stat-label">Total Tasks</span>
+    <strong id="metric-total" class="stat-value">0</strong>
+  </article>
+  <article class="stat-card card-surface">
+    <span class="stat-label">Completed</span>
+    <strong id="metric-completed" class="stat-value">0</strong>
+  </article>
+  <article class="stat-card card-surface">
+    <span class="stat-label">Pending</span>
+    <strong id="metric-pending" class="stat-value">0</strong>
+  </article>
+  <article class="stat-card card-surface">
+    <span class="stat-label">Completion Rate</span>
+    <strong id="metric-percentage" class="stat-value">0%</strong>
+  </article>
+</section>
+
+<div class="dashboard-grid">
+  <section class="card-surface p-4">
+    <div class="section-heading mb-3">
+      <div>
+        <p class="eyebrow mb-1">Add task</p>
+        <h2 class="section-title mb-0">New task entry</h2>
+      </div>
+    </div>
+    <form id="task-form" class="task-form">
+      <div class="mb-3">
+        <label class="form-label" for="title">Title</label>
+        <input class="form-control" id="title" name="title" type="text" placeholder="Design landing page" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4" placeholder="Add details, milestones, or acceptance criteria."></textarea>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="priority">Priority</label>
+          <select class="form-select" id="priority" name="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="status">Status</label>
+          <select class="form-select" id="status" name="status">
+            <option value="pending" selected>Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-accent mt-4" type="submit">
+        <span class="btn-label">Add Task</span>
+        <span class="btn-spinner spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+      </button>
+    </form>
+  </section>
+
+  <section class="card-surface p-4">
+    <div class="section-heading mb-3">
+      <div>
+        <p class="eyebrow mb-1">Task list</p>
+        <h2 class="section-title mb-0">Your tasks</h2>
+      </div>
+      <button id="refresh-btn" class="btn btn-outline-light btn-sm" type="button">Refresh</button>
+    </div>
+
+    <div class="table-responsive task-table-wrap">
+      <table class="table table-dark table-hover align-middle task-table mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="task-table-body">
+          <tr>
+            <td colspan="5" class="text-center py-5 text-soft">Loading tasks...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<section class="card-surface p-4 mt-4">
+  <div class="section-heading mb-3">
+    <div>
+      <p class="eyebrow mb-1">Live feed</p>
+      <h2 class="section-title mb-0">Notifications</h2>
+    </div>
+    <span class="live-dot">Connected</span>
+  </div>
+  <div id="notification-area" class="notification-area">
+    <div class="notification-empty">No updates yet. Task changes will appear here in real time.</div>
+  </div>
+</section>
+
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-panel">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Edit Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-task-form">
+          <input type="hidden" id="edit-task-id" name="task_id">
+          <div class="mb-3">
+            <label class="form-label" for="edit-title">Title</label>
+            <input class="form-control" id="edit-title" name="title" type="text" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="edit-description">Description</label>
+            <textarea class="form-control" id="edit-description" name="description" rows="4"></textarea>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="edit-priority">Priority</label>
+              <select class="form-select" id="edit-priority" name="priority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="edit-status">Status</label>
+              <select class="form-select" id="edit-status" name="status">
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-accent" type="submit">
+              <span class="btn-label">Save Changes</span>
+              <span class="btn-spinner spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

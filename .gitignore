@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Environment Variables
+.env
+
+# Flask
+instance/
+.webassets-cache/
+
+# Database
+*.db
+*.sqlite3
+
+# PostgreSQL dump files
+*.sql
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Uploaded files
+uploads/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Node modules (if frontend tools used)
+node_modules/

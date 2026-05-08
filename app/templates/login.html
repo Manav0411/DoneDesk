@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Login | Smart Task Manager{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <section class="auth-panel card-surface">
+    <div class="mb-4">
+      <p class="eyebrow">Welcome back</p>
+      <h1 class="display-title">Sign in to your task command center.</h1>
+      <p class="lead text-soft">Track priorities, review analytics, and get live updates in one place.</p>
+    </div>
+
+    <div id="auth-alert" class="alert d-none" role="alert"></div>
+
+    <form id="auth-form" data-auth-form="login" method="post" action="{{ url_for('auth.login_page') }}" class="auth-form">
+      <div class="mb-3">
+        <label class="form-label" for="identifier">Email or Username</label>
+        <input class="form-control form-control-lg" id="identifier" name="identifier" type="text" placeholder="you@example.com" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control form-control-lg" id="password" name="password" type="password" placeholder="••••••••" required>
+      </div>
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <div class="form-check">
+          <input class="form-check-input" id="remember" name="remember" type="checkbox">
+          <label class="form-check-label" for="remember">Remember me</label>
+        </div>
+        <a class="link-soft" href="{{ url_for('auth.register_page') }}">Create account</a>
+      </div>
+      <button class="btn btn-accent btn-lg w-100" type="submit">
+        <span class="btn-label">Login</span>
+        <span class="btn-spinner spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+      </button>
+    </form>
+  </section>
+
+  <aside class="auth-side card-surface">
+    <div class="feature-pill">Real-time task updates</div>
+    <h2 class="side-title">Built for focused execution.</h2>
+    <p class="text-soft mb-4">Flask APIs, PostgreSQL storage, live SocketIO notifications, and a clean analytics layer powered by Pandas and NumPy.</p>
+    <div class="mini-grid">
+      <div class="mini-card">
+        <span>Fast CRUD</span>
+        <strong>Fetch-powered APIs</strong>
+      </div>
+      <div class="mini-card">
+        <span>Secure auth</span>
+        <strong>Flask-Login sessions</strong>
+      </div>
+      <div class="mini-card">
+        <span>Insights</span>
+        <strong>Live analytics cards</strong>
+      </div>
+      <div class="mini-card">
+        <span>Live sync</span>
+        <strong>Socket-based refresh</strong>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}
