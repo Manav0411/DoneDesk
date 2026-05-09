@@ -371,7 +371,6 @@ body.app-body {
   }
 }
 
-/* Premium dashboard theme overrides */
 :root {
   --bg-0: #050816;
   --bg-1: #091225;
@@ -1016,7 +1015,6 @@ body.app-body::before {
   }
 }
 
-/* Surefy-inspired final skin */
 :root {
   --bg-0: #040225;
   --bg-1: #070332;
@@ -1244,7 +1242,6 @@ body.app-body::before {
   }
 }
 
-/* Refinement layer: production polish */
 .workspace-panel {
   gap: 1.35rem;
 }

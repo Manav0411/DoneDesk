@@ -22,6 +22,7 @@ instance/
 
 # PostgreSQL dump files
 *.sql
+!schema.sql
 
 # VS Code
 .vscode/
