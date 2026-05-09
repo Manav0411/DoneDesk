@@ -5,14 +5,14 @@
 <div class="dashboard-shell">
   <aside class="sidebar-panel card-surface">
     <div class="sidebar-brand">
-      <div class="brand-badge brand-badge-lg">ST</div>
+      <img class="brand-logo brand-logo-lg" src="{{ url_for('static', filename='img/logo.png') }}" alt="DoneDesk logo">
       <div>
         <div class="sidebar-name">DoneDesk</div>
         <div class="sidebar-subtitle">AI SaaS workspace</div>
       </div>
     </div>
 
-    <p class="sidebar-copy">A focused command center for task operations, analytics, and live status updates.</p>
+    <p class="sidebar-copy">A focused command center for task operations, analytics and live status updates.</p>
 
     <nav class="sidebar-nav">
       <a class="sidebar-link" href="#overview">Overview</a>
@@ -24,7 +24,7 @@
     <div class="sidebar-card">
       <span>Workspace</span>
       <strong>{{ current_user.username }}</strong>
-      <small>{{ current_user.email }}</small>
+      <small>Focused task operations and analytics.</small>
     </div>
 
     <div class="sidebar-card sidebar-card-accent">
@@ -39,7 +39,7 @@
       <div>
         <p class="eyebrow mb-2">Operations console</p>
         <h1 class="workspace-title mb-2">Task dashboard built for focused execution.</h1>
-        <p class="workspace-copy mb-0">Plan work, track priorities, and stay in sync with live updates.</p>
+        <p class="workspace-copy mb-0">Plan work, track priorities and stay in sync with live updates.</p>
       </div>
       <div class="workspace-actions">
         <button class="btn btn-ghost d-lg-none" id="sidebar-toggle" type="button" aria-label="Toggle sidebar">Menu</button>
@@ -54,7 +54,7 @@
       <div class="hero-copy">
         <p class="eyebrow mb-2">Realtime AI workspace</p>
         <h2 class="hero-title mb-3">Keep your tasks aligned, visible, and moving.</h2>
-        <p class="hero-text mb-4">Monitor throughput, update priorities, and ship work with confidence.</p>
+        <p class="hero-text mb-4">Monitor throughput, update priorities and ship work with confidence.</p>
         <div class="hero-actions">
           <a class="btn btn-accent" href="#tasks">Create task</a>
           <a class="btn btn-ghost" href="#activity">View live feed</a>
@@ -62,16 +62,24 @@
       </div>
       <div class="hero-aside">
         <div class="hero-stat-card">
-          <span>Owner</span>
-          <strong>{{ current_user.username }}</strong>
+          <span>Tasks Created Today</span>
+          <strong id="hero-completed-today">0</strong>
+          <small>Created in the last 24 hours</small>
         </div>
         <div class="hero-stat-card">
-          <span>Email</span>
-          <strong class="text-truncate">{{ current_user.email }}</strong>
+          <span>High Priority Queue</span>
+          <strong id="hero-high-priority">0</strong>
+          <small>Items still open in the urgent queue</small>
         </div>
         <div class="hero-stat-card hero-stat-card-gradient">
-          <span>Status</span>
-          <strong class="d-flex align-items-center gap-2"><span class="live-dot"></span> Online</strong>
+          <span>Active Focus Trend</span>
+          <strong id="hero-focus-indicator">→</strong>
+          <small id="hero-focus-trend">Focus trend: Tracking baseline</small>
+        </div>
+        <div class="hero-stat-card">
+          <span>Recent Activity</span>
+          <strong id="hero-recent-activity">0</strong>
+          <small id="hero-activity-summary">Task changes in the last hour</small>
         </div>
       </div>
     </section>

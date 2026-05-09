@@ -14,6 +14,12 @@
   const metricCompleted = document.getElementById("metric-completed");
   const metricPending = document.getElementById("metric-pending");
   const metricPercentage = document.getElementById("metric-percentage");
+  const heroCompletedToday = document.getElementById("hero-completed-today");
+  const heroHighPriority = document.getElementById("hero-high-priority");
+  const heroFocusIndicator = document.getElementById("hero-focus-indicator");
+  const heroFocusTrend = document.getElementById("hero-focus-trend");
+  const heroRecentActivity = document.getElementById("hero-recent-activity");
+  const heroActivitySummary = document.getElementById("hero-activity-summary");
   const completionChartCanvas = document.getElementById("completion-chart");
   const priorityChartCanvas = document.getElementById("priority-chart");
   const completionChartEmpty = document.getElementById("completion-chart-empty");
@@ -275,6 +281,106 @@
     }).format(new Date(value));
   };
 
+  const toTaskDate = (value) => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const isSameDay = (left, right) =>
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate();
+
+  const isWithinDays = (date, days) => {
+    const now = new Date();
+    const windowStart = new Date(now);
+    windowStart.setHours(0, 0, 0, 0);
+    windowStart.setDate(windowStart.getDate() - days + 1);
+    return date >= windowStart && date <= now;
+  };
+
+  const formatTrend = (recent, previous) => {
+    if (!recent && !previous) {
+      return "Focus trend: No baseline yet";
+    }
+
+    if (!previous) {
+      return recent ? "Focus trend: New momentum this week" : "Focus trend: No completed work this week";
+    }
+
+    const change = Math.round(((recent - previous) / previous) * 100);
+    if (change === 0) {
+      return "Focus trend: Holding steady vs last week";
+    }
+
+    return `Focus trend: ${change > 0 ? "+" : ""}${change}% vs last week`;
+  };
+
+  const updateHeroWidgets = (tasks, metrics) => {
+    const now = new Date();
+    const todayCreated = tasks.filter((task) => {
+      const createdAt = toTaskDate(task.created_at);
+      return createdAt && isSameDay(createdAt, now);
+    }).length;
+
+    const highPriorityActive = tasks.filter(
+      (task) => String(task.priority || "").toLowerCase() === "high" && String(task.status || "").toLowerCase() !== "completed",
+    ).length;
+
+    const completedRecently = tasks.filter((task) => {
+      const createdAt = toTaskDate(task.created_at);
+      return task.status === "completed" && createdAt && isWithinDays(createdAt, 7);
+    }).length;
+
+    const completedPreviousWeek = tasks.filter((task) => {
+      const createdAt = toTaskDate(task.created_at);
+      if (!createdAt) {
+        return false;
+      }
+
+      const previousWindowStart = new Date(now);
+      previousWindowStart.setHours(0, 0, 0, 0);
+      previousWindowStart.setDate(previousWindowStart.getDate() - 13);
+      const previousWindowEnd = new Date(now);
+      previousWindowEnd.setHours(0, 0, 0, 0);
+      previousWindowEnd.setDate(previousWindowEnd.getDate() - 7);
+      return task.status === "completed" && createdAt >= previousWindowStart && createdAt < previousWindowEnd;
+    }).length;
+
+    const lastHourStart = new Date(now);
+    lastHourStart.setHours(lastHourStart.getHours() - 1);
+    const recentActivityCount = tasks.filter((task) => {
+      const createdAt = toTaskDate(task.created_at);
+      return createdAt && createdAt >= lastHourStart;
+    }).length;
+
+    const completionTrend = completedRecently > completedPreviousWeek ? "↑" : completedRecently < completedPreviousWeek ? "↓" : "→";
+
+    if (heroCompletedToday) {
+      heroCompletedToday.textContent = String(todayCreated);
+    }
+
+    if (heroHighPriority) {
+      heroHighPriority.textContent = String(highPriorityActive);
+    }
+
+    if (heroFocusIndicator) {
+      heroFocusIndicator.textContent = completionTrend;
+    }
+
+    if (heroFocusTrend) {
+      heroFocusTrend.textContent = formatTrend(completedRecently, completedPreviousWeek);
+    }
+
+    if (heroRecentActivity) {
+      heroRecentActivity.textContent = String(recentActivityCount);
+    }
+
+    if (heroActivitySummary) {
+      heroActivitySummary.textContent = `Task changes in the last hour`;
+    }
+  };
+
   const renderTaskRows = (tasks) => {
     if (!tasks.length) {
       taskTableBody.innerHTML = `
@@ -334,6 +440,7 @@
       metricCompleted.textContent = metrics.completed_tasks ?? 0;
       metricPending.textContent = metrics.pending_tasks ?? 0;
       metricPercentage.textContent = `${metrics.completion_percentage ?? 0}%`;
+      updateHeroWidgets(currentTasks, metrics);
       updateCharts(currentTasks, metrics);
     } catch (_error) {
       const totalTasks = currentTasks.length;
@@ -345,6 +452,10 @@
       metricCompleted.textContent = completedTasks;
       metricPending.textContent = pendingTasks;
       metricPercentage.textContent = `${completion}%`;
+      updateHeroWidgets(currentTasks, {
+        completion_percentage: completion,
+        completed_tasks: completedTasks,
+      });
       updateCharts(currentTasks, {
         total_tasks: totalTasks,
         completed_tasks: completedTasks,
@@ -438,8 +549,6 @@
 
       onSuccess?.(data);
       await loadTasks();
-      addNotification("Task update", data.message || "Task saved.");
-      showToast(data.message || "Task saved.", "success", eventTitle || "Task update");
     } catch (error) {
       showToast(error.message, "danger", eventTitle || "Task update");
     } finally {
@@ -496,8 +605,6 @@
         }
 
         await loadTasks();
-        addNotification("Task deleted", data.message || "Task removed.");
-        showToast(data.message || "Task deleted.", "success", "Task deleted");
       } catch (error) {
         showToast(error.message, "danger", "Task deleted");
       }
@@ -537,18 +644,25 @@
     socket = io({ transports: ["websocket", "polling"] });
     socket.on("connect", () => {
       addNotification("Connected", "Live updates are active.");
-      showToast("Live updates are active.", "info", "Connected");
     });
     socket.on("task_notification", (payload) => {
       if (payload?.event === "connected") {
+        showToast("Live updates are active.", "info", "Connected");
         return;
       }
       addNotification("Task activity", payload?.message || "Task updated.");
-      showToast(payload?.message || "Task updated.", "info", "Task activity");
     });
     socket.on("tasks_updated", async (payload) => {
       addNotification("Sync update", payload?.message || "Refreshing tasks.");
-      showToast(payload?.message || "Refreshing tasks.", "info", "Sync update");
+      if (payload?.event === "created") {
+        showToast(payload?.message || "Task created.", "success", "Task created");
+      } else if (payload?.event === "updated") {
+        showToast(payload?.message || "Task updated.", "success", "Task updated");
+      } else if (payload?.event === "deleted") {
+        showToast(payload?.message || "Task deleted.", "success", "Task deleted");
+      } else {
+        showToast(payload?.message || "Refreshing tasks.", "info", "Sync update");
+      }
       await loadTasks();
     });
     socket.on("disconnect", () => {
