@@ -101,6 +101,7 @@ The logo and color theme used in this project were adapted for inspiration purpo
 ### Dashboard
 
 ![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/dashboard2.png)
 
 ### Analytics
 
